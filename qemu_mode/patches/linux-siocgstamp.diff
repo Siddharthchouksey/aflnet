@@ -1,0 +1,15 @@
+--- a/linux-user/ioctls.h
++++ b/linux-user/ioctls.h
+@@ -171,8 +171,12 @@
+   IOCTL(SIOCGIWNAME, IOC_W | IOC_R, MK_PTR(MK_STRUCT(STRUCT_char_ifreq)))
+   IOCTL(SIOCGPGRP, IOC_R, MK_PTR(TYPE_INT)) /* pid_t */
+-  IOCTL(SIOCGSTAMP, IOC_R, MK_PTR(MK_STRUCT(STRUCT_timeval)))
+-  IOCTL(SIOCGSTAMPNS, IOC_R, MK_PTR(MK_STRUCT(STRUCT_timespec)))
++#ifdef SIOCGSTAMP
++  IOCTL(SIOCGSTAMP, IOC_R, MK_PTR(MK_STRUCT(STRUCT_timeval)))
++#endif
++#ifdef SIOCGSTAMPNS
++  IOCTL(SIOCGSTAMPNS, IOC_R, MK_PTR(MK_STRUCT(STRUCT_timespec)))
++#endif
+ 
+   IOCTL(CDROMPAUSE, 0, TYPE_NULL)

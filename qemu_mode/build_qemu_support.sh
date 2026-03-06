@@ -30,7 +30,7 @@
 
 
 VERSION="2.10.0"
-QEMU_URL="http://download.qemu-project.org/qemu-${VERSION}.tar.xz"
+QEMU_URL="https://download.qemu.org/qemu-${VERSION}.tar.xz"
 QEMU_SHA384="68216c935487bc8c0596ac309e1e3ee75c2c4ce898aab796faa321db5740609ced365fedda025678d072d09ac8928105"
 
 echo "================================================="
@@ -139,15 +139,29 @@ patch -p1 <../patches/cpu-exec.diff || exit 1
 patch -p1 <../patches/syscall.diff || exit 1
 patch -p1 <../patches/configure.diff || exit 1
 patch -p1 <../patches/memfd.diff || exit 1
+patch -p1 <../patches/glibc-gettid.diff || exit 1
+patch -p1 <../patches/linux-siocgstamp.diff || exit 1
 
 echo "[+] Patching done."
 
 # --enable-pie seems to give a couple of exec's a second performance
 # improvement, much to my surprise. Not sure how universal this is..
 
+# Allow caller to override: export PYTHON2=/path/to/python2.7
+# Default: pyenv install under $HOME (works for any user)
+PYTHON2="${PYTHON2:-$HOME/.pyenv/versions/2.7.18/bin/python2.7}"
+if [ ! -f "$PYTHON2" ]; then
+  echo "[-] Error: Python 2.7 not found at $PYTHON2"
+  echo "[-] Set the path explicitly before running this script:"
+  echo "[-]   export PYTHON2=/path/to/python2.7"
+  echo "[-] Or install via pyenv: pyenv install 2.7.18"
+  exit 1
+fi
+
 CFLAGS="-O3 -ggdb" ./configure --disable-system \
   --enable-linux-user --disable-gtk --disable-sdl --disable-vnc \
-  --target-list="${CPU_TARGET}-linux-user" --enable-pie --enable-kvm || exit 1
+  --target-list="${CPU_TARGET}-linux-user" --enable-pie --enable-kvm \
+  --python="$PYTHON2" || exit 1
 
 echo "[+] Configuration complete."
 

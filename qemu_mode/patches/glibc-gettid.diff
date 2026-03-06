@@ -1,0 +1,13 @@
+--- a/linux-user/syscall.c
++++ b/linux-user/syscall.c
+@@ -257,7 +257,9 @@
+ #endif
+ 
+ #ifdef __NR_gettid
+-_syscall0(int, gettid)
++#if !defined(__GLIBC__) || (__GLIBC__ < 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 30)
++_syscall0(int, gettid)
++#endif
+ #else
+ /* This is a replacement for the host gettid() and must return a host
+    errno. */
